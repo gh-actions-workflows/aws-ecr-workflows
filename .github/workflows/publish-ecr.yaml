@@ -1,0 +1,60 @@
+name: Docker publish on private AWS ECR repository
+
+on:
+    workflow_call:
+        inputs:
+            image_name:
+                type: string
+                required: true
+            image_tag:
+                type: string
+                required: true
+        secrets:
+            aws_role_to_assume:
+                required: true
+            aws_region:
+                required: true
+
+        outputs:
+            image_name:
+                description: The image name and tag published
+                value: ${{ jobs.ecr.outputs.image_name }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+    ecr:  
+      runs-on: ubuntu-latest
+
+      outputs:
+        image_name: ${{ steps.set_image_name.outputs.ECR_IMAGE_URI }}
+
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ secrets.aws_role_to_assume }}
+            aws-region: ${{ secrets.aws_region }}
+
+        - name: Amazon ECR Login
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+          with:
+            registry-type: private
+
+        - name: Set Docker image name and tag
+          id: set_image_name
+          env:
+            ECR_IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
+          run: |
+            echo "ECR_IMAGE_URI="$ECR_IMAGE_URI >> $GITHUB_OUTPUT
+
+        - name: Build and push docker image to Amazon ECR
+          run: |
+            docker build -t ${{ steps.set_image_name.outputs.ECR_IMAGE_URI }} .
+            docker push ${{ steps.set_image_name.outputs.ECR_IMAGE_URI }}
