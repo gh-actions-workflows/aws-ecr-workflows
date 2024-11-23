@@ -1,8 +1,8 @@
 # AWS ECR Publish Workflow
 
-Publique a sua imagem Docker no AWS ECR.
+Publish your Docker image to AWS ECR.
 
-## Como usar?
+## How to use?
 
 ```yaml
 name: Publish Docker Image
@@ -17,12 +17,12 @@ jobs:
     uses: gh-actions-workflows/aws-ecr-workflows/.github/workflows/publish-ecr.yaml@1.3
     with:
       image_name: my-image-name
-      image_tag: ${{ github.sha }} # Utilize o o valor que quiser para a tag
+      image_tag: ${{ github.sha }} # Use whatever value you want for the tag
       aws_region: ${{ vars.AWS_REGION }}
     secrets:
       aws_role_to_assume: ${{ secrets.AWS_ROLE }}
 ```
 
-Para mais detalhes sobre o funcionamento consulte o arquivo: [publish-ecr.yaml](https://github.com/gh-actions-workflows/aws-ecr-workflows/blob/master/.github/workflows/publish-ecr.yaml).
+For more details on how it works, see the file: [publish-ecr.yaml](https://github.com/gh-actions-workflows/aws-ecr-workflows/blob/master/.github/workflows/publish-ecr.yaml).
 
-Para detalhes de como criar a role necessária consulte a seguinte documentação: [AWS Configure Credentials](https://github.com/aws-actions/configure-aws-credentials/blob/main/README.md).
+For details on how to create the required role, see the following documentation: [AWS Configure Credentials](https://github.com/aws-actions/configure-aws-credentials/blob/main/README.md).
